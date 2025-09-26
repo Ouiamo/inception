@@ -1,27 +1,31 @@
-version: "3.8"
-
 services:
   mariadb:
     build: ./requirements/mariadb
     container_name: mariadb
-    restart: always
-    env_file: .env
+    env_file:
+      - .env
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - inception_net
+    restart: always
+
   wordpress:
     build: ./requirements/wordpress
     container_name: wordpress
-    restart: always
-    env_file: .env
     depends_on:
       - mariadb
+    env_file:
+      - .env
+    volumes:
+      - wp_data:/var/www/html
     networks:
       - inception_net
+    restart: always
 
 volumes:
   db_data:
+  wp_data:
 
 networks:
   inception_net:

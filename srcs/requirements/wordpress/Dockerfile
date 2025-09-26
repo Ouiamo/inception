@@ -1,26 +1,19 @@
-# Use the Debian Bullseye image as a base
 FROM debian:bullseye
 
-# Set environment variable to make package installations non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary packages for WordPress and PHP-FPM
+# Install PHP, MySQL support, curl, wget, unzip, and wp-cli
 RUN apt-get update -y && \
-    apt-get install -y php7.4-fpm php7.4-mysql curl && \
+    apt-get install -y php-cli php-fpm php-mysql curl wget unzip less && \
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp && \
     rm -rf /var/lib/apt/lists/*
 
-# Create a directory to hold the WordPress files
-RUN mkdir -p /var/www/html
+# Copy entrypoint
+COPY tools/entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Create the directory for the PHP-FPM PID file
-RUN mkdir -p /run/php
+WORKDIR /var/www/html
 
-# Copy the WordPress setup script into the container
-COPY ./tools/init_wp.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init_wp.sh
-
-# Expose port 9000, which is the default for PHP-FPM
-EXPOSE 9000
-
-# Set the command to run when the container starts
-CMD ["init_wp.sh"]
+ENTRYPOINT ["entrypoint.sh"]
