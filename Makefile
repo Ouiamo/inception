@@ -48,3 +48,6 @@ mariadb-shell:
 
 wordpress-shell:
 	@docker exec -it wordpress sh
+
+nginx-shell:
+	@docker exec -it nginx sh
