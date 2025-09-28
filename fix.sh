@@ -1,37 +1,17 @@
-#!/bin/bash
+echo "=== COMPREHENSIVE TEST ==="
+echo "1. Containers running:"
+docker ps
 
-# Fix mariadb entrypoint filename
-mv srcs/requirements/mariadb/tools/enterypoint.sh srcs/requirements/mariadb/tools/entrypoint.sh 2>/dev/null || true
+echo "2. WordPress installation:"
+docker exec wordpress wp core is-installed --allow-root
 
-# Set execute permissions
-chmod +x srcs/requirements/mariadb/tools/*.sh
-chmod +x srcs/requirements/wordpress/tools/*.sh
+echo "3. Database connection:"
+docker exec wordpress mysql -h mariadb -u wp_user -p"wp_password" -e "SELECT 1" 2>/dev/null && echo "✅ Database connected" || echo "❌ Database connection failed"
 
-# Create .env file if it doesn't exist
-if [ ! -f "srcs/.env" ]; then
-    cat > srcs/.env << EOF
-# Domain
-DOMAIN_NAME=oaoulad-.42.fr
+echo "4. WordPress files:"
+docker exec wordpress ls -la /var/www/html/wp-config.php && echo "✅ wp-config.php exists" || echo "❌ wp-config.php missing"
 
-# Database
-DB_NAME=wordpress
-DB_USER=wp_user
-DB_PASSWORD=wp_password
-DB_ROOT_PASSWORD=root_password
-DB_HOST=mariadb
-DB_PORT=3306
+echo "5. php-fpm status:"
+docker exec wordpress ps aux | grep php-fpm && echo "✅ php-fpm running" || echo "❌ php-fpm not running"
 
-# WordPress
-WP_TITLE=My WordPress Site
-WP_ADMIN_USER=superuser
-WP_ADMIN_PASSWORD=admin_password
-WP_ADMIN_EMAIL=admin@oaoulad-.42.fr
-
-# Paths
-WP_VOLUME=/home/oaoulad-/data/wordpress
-DB_VOLUME=/home/oaoulad-/data/mariadb
-EOF
-    echo "Created srcs/.env file"
-fi
-
-echo "All fixes applied! Now run: make build"
+echo "=== ALL TESTS COMPLETED ==="

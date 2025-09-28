@@ -22,6 +22,7 @@ RUN apk update && apk add --no-cache \
     php81-iconv \
     curl \
     mariadb-client \
+    openssl \
     && rm -rf /var/cache/apk/*
 
 # Install WP-CLI
@@ -36,6 +37,9 @@ WORKDIR /var/www/html
 # Copy configuration and tools
 COPY conf/wordpress.conf /etc/php81/php-fpm.d/www.conf
 COPY tools/entrypoint.sh /usr/local/bin/
+
+# Create custom PHP configuration with higher memory limit
+RUN echo 'memory_limit = 256M' > /etc/php81/conf.d/99-custom.ini
 
 # Set permissions
 RUN chmod +x /usr/local/bin/entrypoint.sh
