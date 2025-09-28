@@ -1,24 +1,25 @@
-#!/bin/bash
+#!/bin/sh
+
 set -e
 
-# Temporary SQL file
-TEMP_FILE=/tmp/temp_db_setup.sql
+# Start MariaDB temporarily to run initialization
+mysqld_safe --datadir='/var/lib/mysql' &
 
-# If the DB is not initialized yet
-if [ ! -d "/var/lib/mysql/${DB_NAME}" ]; then
-    echo "Initializing database..."
+# Wait for MariaDB to start
+while ! mysqladmin ping --silent; do
+    sleep 1
+done
 
-    cat <<EOF > "$TEMP_FILE"
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
-CREATE DATABASE IF NOT EXISTS ${DB_NAME};
-CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
-GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
-FLUSH PRIVILEGES;
-EOF
+# Create database and users
+mysql -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
+mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';"
+mysql -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'%';"
 
-    # Run SQL setup in bootstrap mode
-    mysqld --init-file="$TEMP_FILE" --user=mysql --bootstrap
-fi
+# Create administrator user (non-admin named)
+mysql -e "CREATE USER IF NOT EXISTS '${WP_ADMIN_USER}'@'%' IDENTIFIED BY '${WP_ADMIN_PASSWORD}';"
+mysql -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${WP_ADMIN_USER}'@'%';"
 
-# Start MariaDB in foreground
-exec mysqld_safe
+mysql -e "FLUSH PRIVILEGES;"
+
+# Stop the temporary MariaDB instance
+mysqladmin shutdown

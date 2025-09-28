@@ -1,19 +1,47 @@
-FROM debian:bullseye
+# Using penultimate stable Alpine
+FROM alpine:3.18
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Install PHP, php-fpm, and necessary extensions
+RUN apk update && apk add --no-cache \
+    php81 \
+    php81-fpm \
+    php81-mysqli \
+    php81-json \
+    php81-curl \
+    php81-dom \
+    php81-exif \
+    php81-fileinfo \
+    php81-mbstring \
+    php81-openssl \
+    php81-xml \
+    php81-xmlreader \
+    php81-zip \
+    php81-gd \
+    php81-intl \
+    php81-phar \
+    php81-iconv \
+    curl \
+    mariadb-client \
+    && rm -rf /var/cache/apk/*
 
-# Install PHP, MySQL support, curl, wget, unzip, and wp-cli
-RUN apt-get update -y && \
-    apt-get install -y php-cli php-fpm php-mysql curl wget unzip less && \
-    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp && \
-    rm -rf /var/lib/apt/lists/*
+# Install WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
 
-# Copy entrypoint
-COPY tools/entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
+# Create WordPress directory
+RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 
-ENTRYPOINT ["entrypoint.sh"]
+# Copy configuration and tools
+COPY conf/wordpress.conf /etc/php81/php-fpm.d/www.conf
+COPY tools/entrypoint.sh /usr/local/bin/
+
+# Set permissions
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Expose php-fpm port (usually 9000)
+EXPOSE 9000
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm81", "-F"]
