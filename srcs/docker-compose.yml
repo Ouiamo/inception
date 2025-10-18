@@ -44,6 +44,29 @@ services:
     depends_on:
       - wordpress
 
+  adminer:
+    build:
+      context: ./requirements/adminer
+      dockerfile: Dockerfile
+    container_name: adminer
+    restart: unless-stopped
+    networks:
+      - inception_network
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mariadb
+  redis:
+    build:
+      context: ./requirements/redis
+      dockerfile: Dockerfile
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - inception_network
+    volumes:
+      - redis_data:/var/lib/redis
+
 networks:
   inception_network:
     driver: bridge
@@ -52,4 +75,6 @@ volumes:
   mariadb_data:
     driver: local
   wordpress_data:
+    driver: local
+  redis_data:
     driver: local

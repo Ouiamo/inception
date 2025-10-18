@@ -38,6 +38,18 @@ fclean: clean
 
 re: fclean all
 
+adminer-build:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build adminer
+
+adminer-up:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d adminer
+
+adminer-down:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop adminer
+
+adminer-shell:
+	docker exec -it adminer sh
+
 # Check if containers are running
 status:
 	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
