@@ -10,7 +10,7 @@ NC = \033[0m
 
 .PHONY: all build up down clean fclean re logs
 
-all: build up
+all: build redis-up
 
 build:
 	@echo "$(GREEN)Building containers...$(NC)"
@@ -49,6 +49,20 @@ adminer-down:
 
 adminer-shell:
 	docker exec -it adminer sh
+
+# Add these to your Makefile
+
+redis-build:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build redis
+
+redis-up:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d redis
+
+redis-down:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop redis
+
+redis-shell:
+	@docker exec -it redis redis-cli
 
 # Check if containers are running
 status:
