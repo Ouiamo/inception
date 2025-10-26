@@ -30,6 +30,14 @@ RUN mkdir -p /var/www/html
 
 WORKDIR /var/www/html
 
+# Create wp-content/plugins directory and install Redis cache plugin
+RUN mkdir -p /var/www/html/wp-content/plugins
+
+COPY redis-cache.2.7.0.zip /tmp/redis-cache.zip
+RUN cd /var/www/html/wp-content/plugins && \
+    unzip /tmp/redis-cache.zip && \
+    rm /tmp/redis-cache.zip
+
 # Copy configuration files
 COPY conf/wordpress.conf /etc/php81/php-fpm.d/www.conf
 COPY tools/entrypoint.sh /usr/local/bin/

@@ -10,7 +10,7 @@ NC = \033[0m
 
 .PHONY: all build up down clean fclean re logs
 
-all: build redis-up
+all: build up 
 
 build:
 	@echo "$(GREEN)Building containers...$(NC)"
