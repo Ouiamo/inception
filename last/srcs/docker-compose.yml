@@ -1,0 +1,116 @@
+services:
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: mariadb
+    restart: "always"
+    networks:
+      - inception_network
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    env_file:
+      - .env
+
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress
+    restart: "always"
+    networks:
+      - inception_network
+    volumes:
+      - wordpress_data:/var/www/html
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    restart: "always"
+    networks:
+      - inception_network
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress_data:/var/www/html:ro
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+
+  adminer:
+    build:
+      context: ./requirements/adminer
+      dockerfile: Dockerfile
+    container_name: adminer
+    restart: "always"
+    networks:
+      - inception_network
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+
+  redis:
+    build:
+      context: ./requirements/redis
+      dockerfile: Dockerfile
+    container_name: redis
+    restart: "always"
+    networks:
+      - inception_network
+    volumes:
+      - redis_data:/var/lib/redis
+    env_file:
+      - .env
+  ftp:
+    build: ./requirements/ftp
+    container_name: ftp
+    restart: "always"
+    networks:
+      - inception_network
+    volumes:
+      - wordpress_data:/home/ftp/user/files
+    env_file:
+      - .env
+    ports:
+      - "21:21"
+      - "20:20"
+      - "30000-30005:30000-30005"
+    depends_on:
+      - wordpress
+
+  static-site:
+    build: ./requirements/static-site
+    container_name: static-site
+    restart: "always"
+    networks:
+      - inception_network
+    ports:
+      - "3000:80"
+    env_file:
+      - .env
+  monitor:
+    build: ./requirements/monitor
+    container_name: monitor
+    restart: unless-stopped
+    networks:
+      - inception_network
+    ports:
+      - "8082:80"
+    env_file:
+      - .env
+
+networks:
+  inception_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+    driver: local
+  wordpress_data:
+    driver: local
+  redis_data:
+    driver: local
