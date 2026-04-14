@@ -1,16 +1,15 @@
-# Variables
 DOCKER_COMPOSE = docker compose
 COMPOSE_FILE = docker-compose.yml
 PROJECT_NAME = inception
 
-# Colors
+
 GREEN = \033[0;32m
 RED = \033[0;31m
 NC = \033[0m
 
 .PHONY: all build up down clean fclean re logs
 
-all: build up 
+all: build redis-up up
 
 build:
 	@echo "$(GREEN)Building containers...$(NC)"
@@ -50,7 +49,6 @@ adminer-down:
 adminer-shell:
 	docker exec -it adminer sh
 
-# Add these to your Makefile
 
 redis-build:
 	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build redis
@@ -64,11 +62,34 @@ redis-down:
 redis-shell:
 	@docker exec -it redis redis-cli
 
-# Check if containers are running
+ftp-build:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build ftp
+
+ftp-up:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d ftp
+
+ftp-down:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop ftp
+
+ftp-shell:
+	@docker exec -it ftp sh
+
+static-build:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build static-site
+
+static-up:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d static-site
+
+static-down:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop static-site
+
+static-logs:
+	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f static-site
+
+
 status:
 	@cd srcs && $(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
 
-# Shell into containers
 mariadb-shell:
 	@docker exec -it mariadb mysql -u root -p
 

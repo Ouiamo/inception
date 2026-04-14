@@ -20,32 +20,24 @@ RUN apk update && apk add --no-cache \
     curl \
     mariadb-client
 
-# Download WP-CLI
+
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
-# Create WordPress directory
+
 RUN mkdir -p /var/www/html
 
 WORKDIR /var/www/html
 
-# Create wp-content/plugins directory and install Redis cache plugin
-RUN mkdir -p /var/www/html/wp-content/plugins
 
-COPY redis-cache.2.7.0.zip /tmp/redis-cache.zip
-RUN cd /var/www/html/wp-content/plugins && \
-    unzip /tmp/redis-cache.zip && \
-    rm /tmp/redis-cache.zip
-
-# Copy configuration files
 COPY conf/wordpress.conf /etc/php81/php-fpm.d/www.conf
 COPY tools/entrypoint.sh /usr/local/bin/
 
-# Increase memory limit
+
 RUN echo 'memory_limit = 256M' > /etc/php81/conf.d/99-custom.ini
 
-# Make entrypoint executable
+
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000

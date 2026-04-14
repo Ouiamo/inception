@@ -1,12 +1,10 @@
 FROM alpine:3.18
 
-# Update and install vsftpd with specific versions
 RUN apk update && apk upgrade && \
     apk add --no-cache \
     vsftpd \
     openssl
 
-# Create user and directories
 RUN adduser -D -h /home/ftp/user -s /bin/false user && \
     mkdir -p /var/run/vsftpd/empty && \
     mkdir -p /home/ftp/user/files && \

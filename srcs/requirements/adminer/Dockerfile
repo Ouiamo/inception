@@ -7,7 +7,6 @@ RUN apk update && apk add --no-cache \
     php81-pdo \
     php81-pdo_mysql
 
-# Create directory and download Adminer
 RUN mkdir -p /var/www/html && \
     wget -O /var/www/html/index.php https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php
 

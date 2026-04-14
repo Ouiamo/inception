@@ -7,10 +7,10 @@ SSL_DIR="/etc/nginx/ssl"
 
 echo "Generating SSL certificates for $DOMAIN..."
 
-# Create SSL directory if it doesn't exist
+
 mkdir -p $SSL_DIR
 
-# Generate private key and certificate
+
 openssl req -newkey rsa:4096 \
             -x509 \
             -sha256 \
@@ -20,7 +20,7 @@ openssl req -newkey rsa:4096 \
             -keyout $SSL_DIR/$DOMAIN.key \
             -subj "/C=MA/ST=KHOURIBGA/L=KHOURIBGA/O=1337/OU=42/CN=$DOMAIN"
 
-# Set proper permissions
+
 chmod 600 $SSL_DIR/$DOMAIN.key
 chmod 644 $SSL_DIR/$DOMAIN.crt
 
